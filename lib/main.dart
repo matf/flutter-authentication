@@ -1,14 +1,13 @@
 /// -----------------------------------
 ///          External Packages
 /// -----------------------------------
-
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
 final FlutterAppAuth appAuth = FlutterAppAuth();
 const FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -17,8 +16,8 @@ const FlutterSecureStorage secureStorage = FlutterSecureStorage();
 ///           Auth0 Variables
 /// -----------------------------------
 
-const String AUTH0_DOMAIN = 'YOUR-AUTH0-DOMAIN';
-const String AUTH0_CLIENT_ID = 'YOUR-AUTH0-CLIENT-ID';
+const String AUTH0_DOMAIN = 'TODO';
+const String AUTH0_CLIENT_ID = 'TODO';
 
 const String AUTH0_REDIRECT_URI = 'com.auth0.flutterdemo://login-callback';
 const String AUTH0_ISSUER = 'https://$AUTH0_DOMAIN';
@@ -146,8 +145,9 @@ class _MyAppState extends State<MyApp> {
 
   Future<Map<String, Object>> getUserDetails(String accessToken) async {
     const String url = 'https://$AUTH0_DOMAIN/userinfo';
+    debugPrint('Userinfo URL: $url');
     final http.Response response = await http.get(
-      url,
+      Uri.parse(url),
       headers: <String, String>{'Authorization': 'Bearer $accessToken'},
     );
 
