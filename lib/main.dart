@@ -181,7 +181,9 @@ class _MyAppState extends State<MyApp> {
           AUTH0_REDIRECT_URI,
           issuer: 'https://$AUTH0_DOMAIN',
           scopes: <String>['openid', 'profile', 'offline_access'],
-          // promptValues: ['login']
+          // Force login prompt on explicit login action
+          promptValues: ['login'],
+          additionalParameters: {'language': 'en'}
         ),
       );
 
@@ -221,8 +223,10 @@ class _MyAppState extends State<MyApp> {
         AuthorizationTokenRequest(AUTH0_CLIENT_ID, AUTH0_REDIRECT_URI,
             issuer: 'https://$AUTH0_DOMAIN',
             scopes: <String>['openid', 'profile', 'offline_access'],
+            // Force signup prompt on explicit login action
+            promptValues: ['login'],
             // Example for pre-selecting the signup screen and defaulting the language
-            additionalParameters: {'language': 'de', 'screen_hint': 'signup'}),
+            additionalParameters: {'language': 'en', 'screen_hint': 'signup'}),
       );
 
       final Map<String, Object> idToken = parseIdToken(result.idToken);
