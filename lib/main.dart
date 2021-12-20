@@ -71,9 +71,11 @@ class Profile extends StatelessWidget {
 
 class Login extends StatelessWidget {
   final Future<void> Function() loginAction;
+  final Future<void> Function() signUpAction;
   final String loginError;
 
-  const Login(this.loginAction, this.loginError, {Key key}) : super(key: key);
+  const Login(this.loginAction, this.signUpAction, this.loginError, {Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +89,13 @@ class Login extends StatelessWidget {
           child: const Text('Login'),
         ),
         Text(loginError ?? ''),
+        RaisedButton(
+          onPressed: () async {
+            await signUpAction();
+          },
+          child: const Text('Sign Up'),
+        ),
+        Text(loginError ?? '')
       ],
     );
   }
@@ -129,7 +138,7 @@ class _MyAppState extends State<MyApp> {
               ? const CircularProgressIndicator()
               : isLoggedIn
                   ? Profile(logoutAction, name, picture)
-                  : Login(loginAction, errorMessage),
+                  : Login(loginAction, signUpAction, errorMessage),
         ),
       ),
     );
@@ -191,6 +200,46 @@ class _MyAppState extends State<MyApp> {
       });
     } on Exception catch (e, s) {
       debugPrint('login error: $e - stack: $s');
+
+      setState(() {
+        isBusy = false;
+        isLoggedIn = false;
+        errorMessage = e.toString();
+      });
+    }
+  }
+
+  Future<void> signUpAction() async {
+    setState(() {
+      isBusy = true;
+      errorMessage = '';
+    });
+
+    try {
+      final AuthorizationTokenResponse result =
+          await appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(AUTH0_CLIENT_ID, AUTH0_REDIRECT_URI,
+            issuer: 'https://$AUTH0_DOMAIN',
+            scopes: <String>['openid', 'profile', 'offline_access'],
+            // Example for pre-selecting the signup screen and defaulting the language
+            additionalParameters: {'language': 'de', 'screen_hint': 'signup'}),
+      );
+
+      final Map<String, Object> idToken = parseIdToken(result.idToken);
+      final Map<String, Object> profile =
+          await getUserDetails(result.accessToken);
+
+      await secureStorage.write(
+          key: 'refresh_token', value: result.refreshToken);
+
+      setState(() {
+        isBusy = false;
+        isLoggedIn = true;
+        name = idToken['name'];
+        picture = profile['picture'];
+      });
+    } on Exception catch (e, s) {
+      debugPrint('signup error: $e - stack: $s');
 
       setState(() {
         isBusy = false;
