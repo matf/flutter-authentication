@@ -16,8 +16,8 @@ const FlutterSecureStorage secureStorage = FlutterSecureStorage();
 ///           Auth0 Variables
 /// -----------------------------------
 
-const String AUTH0_DOMAIN = 'TODO';
-const String AUTH0_CLIENT_ID = 'TODO';
+const String AUTH0_DOMAIN = 'dev-kesabi.eu.auth0.com';
+const String AUTH0_CLIENT_ID = 'fUAhPPezsjZFRG4z9lzBs8csZQR5XjkI';
 
 const String AUTH0_REDIRECT_URI = 'com.auth0.flutterdemo://login-callback';
 const String AUTH0_ISSUER = 'https://$AUTH0_DOMAIN';
@@ -174,17 +174,21 @@ class _MyAppState extends State<MyApp> {
     });
 
     try {
-      final AuthorizationTokenResponse result =
-          await appAuth.authorizeAndExchangeCode(
-        AuthorizationTokenRequest(
+      final authorizationTokenRequest = AuthorizationTokenRequest(
           AUTH0_CLIENT_ID,
           AUTH0_REDIRECT_URI,
           issuer: 'https://$AUTH0_DOMAIN',
-          scopes: <String>['openid', 'profile', 'offline_access'],
-          // Force login prompt on explicit login action
+          scopes: <String>['openid', 'profile', 'offline_access',
+            'perm:test', 'test_role_operator'],
+          // Force login prompt on explicit login action>
           promptValues: ['login'],
-          additionalParameters: {'language': 'en'}
-        ),
+          additionalParameters: {
+            'language': 'en',
+            'audience':'https://kesabi-test.avega.io'}
+        );
+      final AuthorizationTokenResponse result =
+          await appAuth.authorizeAndExchangeCode(
+        authorizationTokenRequest,
       );
 
       final Map<String, Object> idToken = parseIdToken(result.idToken);
@@ -225,7 +229,6 @@ class _MyAppState extends State<MyApp> {
             scopes: <String>['openid', 'profile', 'offline_access'],
             // Force signup prompt on explicit login action
             promptValues: ['login'],
-            // Example for pre-selecting the signup screen and defaulting the language
             additionalParameters: {'language': 'en', 'screen_hint': 'signup'}),
       );
 
